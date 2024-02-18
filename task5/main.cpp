@@ -2,34 +2,37 @@
 #include <vector>
 #include <array>
 
-//todo change consept of working with interger number to string, because have limitation in integer type
+
+const int digitsNum = 10;
+
 int main(){
     std::ios::sync_with_stdio(false);//switch off sync between C++ and C print
     std::cin.tie(0);//отключает сброс буфеера пере вызовом cout
 
 
-    std::vector<int> arr;
+    std::vector<std::string> arrInputData;
     int size = -1;
 
     std::cin >> size;
-    arr.reserve(size);
+    arrInputData.reserve(size);
     std::cout << "Initial array:\n";
+    std::cin.ignore(64, '\n');
     for(int i = 0; i < size; ++i){
-        int temp;
-        std::cin >> temp;
-        arr.push_back(temp);
+        std::string temp{};
+        std::getline(std::cin, temp, '\n');
+        arrInputData.push_back(temp);
         std::cout << temp;
         if(i < size - 1)
             std::cout << ", ";
     }
-
+    int digitSize = arrInputData[0].size();
     std::cout << "\n**********\n";
     //solution
 
 
-    std::array<std::vector<int>,10> buffer{};
+    std::array<std::vector<std::string>,digitsNum> buffer{};//consist 10 string array for bucket, 10 because ten digits
     auto print = [&buffer](){
-        for(int i = 0; i < buffer.size(); ++i){
+        for(int i = 0; i < digitsNum; ++i){
             std::cout << "Bucket " << i << ": ";
             if(buffer[i].empty()){
                 std::cout << "empty";
@@ -46,38 +49,24 @@ int main(){
         std::cout << "**********\n";
     };
 
-    auto lastRadix = [](int num, int rad){
-        int theRad = -1;
-        for(int i = 0; i < rad; ++i){
-            num /= 10;
-        }
-        theRad = num % 10;
-        return theRad;
-    };
 
-    auto numberOfDigits = [](int num){
-        int digits = 0;
-        while(num > 0){
-            num/= 10;
-            ++digits;
-        }
-        return digits;
-    };
 
+    auto lastRadix = [digitSize](std::string numStr, int rad){
+        int num = numStr[digitSize - rad-1] - '0';
+        return num;
+    };
 
     std::cout << "Phase " << 1 << '\n';
-    for(int i : arr){
+    for(std::string i : arrInputData){
         int temp = lastRadix(i, 0);
         buffer[temp].push_back(i);
     }
     print();
 
-    int digits = numberOfDigits(arr[0]);
-    for(int phase = 1; phase < digits; ++phase){
+    for(int phase = 1; phase < arrInputData[0].size(); ++phase){
         std::cout << "Phase " << phase+1 << '\n';
-        //todo count sort, thing how to take items from buffer and process them
-        std::array<std::vector<int>,10> bufferTemp{};
-        for(int i = 0; i < buffer.size(); ++i){
+        std::array<std::vector<std::string>,10> bufferTemp{};
+        for(int i = 0; i < digitsNum; ++i){
             for(int j = 0; j < buffer[i].size(); ++j){
                 int temp = lastRadix(buffer[i][j], phase);
                 bufferTemp[temp].push_back(buffer[i][j]);
@@ -87,20 +76,22 @@ int main(){
         print();
     }
 
+
+
     for(int i = 0, arrIter = 0; i < buffer.size(); ++i){
         for(int j = 0; j <buffer[i].size(); ++j){
             if(buffer[i].empty()){
                 continue;
             }
-            arr[arrIter++] = buffer[i][j];
+            arrInputData[arrIter++] = buffer[i][j];
         }
     }
 
     //
     std::cout << "Sorted array:\n";
-    for(int i = 0; i < arr.size(); ++i){
-        std::cout << arr[i];
-        if(i < arr.size() - 1)
+    for(int i = 0; i < arrInputData.size(); ++i){
+        std::cout << arrInputData[i];
+        if(i < arrInputData.size() - 1)
             std::cout << ", ";
     }
 
